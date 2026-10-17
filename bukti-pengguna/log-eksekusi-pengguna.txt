@@ -160,4 +160,4 @@ Running Mocha tests
 ╚══════════════════════╧═════════╧════════════════════════════════════════════╝
 
 
-~/Col/s7/bc/blockchain-donasi-escrow_v2 ❯
+~/Col/s7/bc/blockchain-donasi-escrow ❯
