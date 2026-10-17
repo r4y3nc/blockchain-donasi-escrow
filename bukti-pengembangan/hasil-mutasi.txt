@@ -1,0 +1,27 @@
+ID   Status                         Diharapkan Test yang gagal
+M1   TERDETEKSI                     TC-16a     TC-16a
+     refund: hapus nonReentrant dan pindahkan penanda refunded setelah transfer
+M2   TERDETEKSI                     TC-16b     TC-16b
+     withdraw: hapus nonReentrant dan nolkan saldo setelah transfer
+M3   TERDETEKSI                     TC-10      TC-10
+     release: hapus pemeriksaan challenge window
+M4   TERDETEKSI                     TC-18      TC-18
+     release: milestone terakhir tidak menerima sisa pembulatan
+M5   TERDETEKSI                     TC-12      TC-12
+     verifikator yang dicabut persetujuannya masih dapat menyetujui
+M6   TERDETEKSI                     TC-04      TC-04
+     createCampaign: hapus pemisahan tugas verifikator
+M7   TERDETEKSI                     TC-09      TC-09
+     openDispute: hapus ambang kontribusi donatur
+M8   TERDETEKSI                     TC-11      TC-11
+     refund: ikut diblokir saat pause
+M9   TERDETEKSI                     TC-13      TC-13
+     escalate: milestone langsung dianggap Approved (pelepasan otomatis)
+M10  TERDETEKSI                     TC-14      TC-14
+     refund pro-rata memakai total terkumpul, bukan sisa escrow
+M11  TERDETEKSI                     TC-02      TC-02
+     createCampaign: hapus validasi jumlah porsi milestone
+M12  TERDETEKSI                     TC-09      TC-09
+     release: tidak memeriksa status Disputed (pembekuan sengketa tidak berlaku)
+
+Terdeteksi: 12 dari 12
