@@ -79,6 +79,8 @@ contract DonationEscrow is ReentrancyGuard {
     mapping(uint256 => mapping(uint8 => Milestone)) private _milestones;
     mapping(uint256 => mapping(address => uint256)) public contributions;
     mapping(uint256 => mapping(address => bool)) public refunded;
+    /// @notice Donatur hanya boleh membuka satu sengketa per kampanye (mitigasi A-01 dan R-06).
+    mapping(uint256 => mapping(address => bool)) public disputeUsed;
     mapping(address => uint256) public claimable;
     mapping(address => bool) public approvedOrganizers;
     mapping(address => bool) public approvedVerifiers;
@@ -141,6 +143,7 @@ contract DonationEscrow is ReentrancyGuard {
     error ChallengeWindowOpen();
     error VerificationWindowNotElapsed();
     error DisputeThresholdNotMet();
+    error DisputeAlreadyUsed();
     error AlreadyRefunded();
     error NothingToRefund();
     error NothingToWithdraw();
@@ -227,6 +230,7 @@ contract DonationEscrow is ReentrancyGuard {
         if (
             fundingTarget == 0 ||
             fundingDeadline <= block.timestamp ||
+            fundingDeadline > block.timestamp + MAX_WINDOW || // mitigasi A-02: tenggat tidak boleh terlalu jauh
             verifier == address(0) ||
             executor == address(0)
         ) revert InvalidParams();
@@ -371,6 +375,8 @@ contract DonationEscrow is ReentrancyGuard {
             if (contributions[id][msg.sender] * BPS < c.totalRaised * disputeThresholdBps) {
                 revert DisputeThresholdNotMet();
             }
+            if (disputeUsed[id][msg.sender]) revert DisputeAlreadyUsed();
+            disputeUsed[id][msg.sender] = true;
         }
         c.status = CampaignStatus.Disputed;
         emit DisputeOpened(id, msg.sender);
@@ -381,7 +387,16 @@ contract DonationEscrow is ReentrancyGuard {
     function resolveDispute(uint256 id, bool resume, bytes32 decisionHash) external onlyRegulator {
         Campaign storage c = _campaign(id);
         if (c.status != CampaignStatus.Disputed) revert WrongState();
+        if (decisionHash == bytes32(0)) revert ZeroHash(); // mitigasi A-04: keputusan wajib berdokumen
         c.status = resume ? CampaignStatus.Active : CampaignStatus.Cancelled;
+        if (resume) {
+            // Mitigasi A-05: jendela verifikasi tidak berjalan selama sengketa,
+            // sehingga verifikator mendapat waktu penuh setelah kampanye dilanjutkan.
+            for (uint8 i = 0; i < c.milestoneCount; ++i) {
+                Milestone storage ms = _milestones[id][i];
+                if (ms.status == MilestoneStatus.Submitted) ms.submittedAt = uint64(block.timestamp);
+            }
+        }
         emit DisputeResolved(id, resume, decisionHash);
     }
 

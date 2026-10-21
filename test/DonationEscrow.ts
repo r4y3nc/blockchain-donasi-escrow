@@ -609,4 +609,74 @@ describe("DonationEscrow", function () {
     const unexpected = [...new Set(types)].filter((t) => !allowed.test(t));
     expect(unexpected, "tipe di luar daftar yang diizinkan").to.deep.equal([]);
   });
+
+  // -------------------------------------------------------------------------
+  it("TC-20 [REQ-08, A-01] donatur hanya dapat membuka satu sengketa per kampanye", async function () {
+    const { escrow, ...a } = await deploy();
+    const id = await activeCampaign(escrow, a);
+
+    await escrow.connect(a.donorA).openDispute(id);
+    await escrow.connect(a.regulator).resolveDispute(id, true, hashOf("keputusan-1"));
+
+    // Donatur yang sama tidak dapat membekukan kampanye lagi.
+    await expect(escrow.connect(a.donorA).openDispute(id)).to.be.revertedWithCustomError(escrow, "DisputeAlreadyUsed");
+    expect((await escrow.getCampaign(id)).status).to.equal(CS.Active);
+
+    // Donatur lain di atas ambang masih punya satu kesempatan, dan Regulator tidak dibatasi.
+    await escrow.connect(a.donorB).openDispute(id);
+    await escrow.connect(a.regulator).resolveDispute(id, true, hashOf("keputusan-2"));
+    await escrow.connect(a.regulator).openDispute(id);
+    expect((await escrow.getCampaign(id)).status).to.equal(CS.Disputed);
+  });
+
+  // -------------------------------------------------------------------------
+  it("TC-21 [REQ-02, A-02] tenggat pendanaan dibatasi paling lama 365 hari", async function () {
+    const { escrow, ...a } = await deploy();
+
+    // Tepat di batas diterima, melebihi batas ditolak.
+    await createCampaign(escrow, a, { deadlineIn: 365 * DAY - 5 });
+    await expect(createCampaign(escrow, a, { deadlineIn: 365 * DAY + 5 * DAY })).to.be.revertedWithCustomError(
+      escrow,
+      "InvalidParams",
+    );
+    await expect(createCampaign(escrow, a, { deadlineIn: 1000 * 365 * DAY })).to.be.revertedWithCustomError(
+      escrow,
+      "InvalidParams",
+    );
+  });
+
+  // -------------------------------------------------------------------------
+  it("TC-22 [REQ-08, A-04] keputusan sengketa wajib memuat hash dokumen", async function () {
+    const { escrow, ...a } = await deploy();
+    const id = await activeCampaign(escrow, a);
+    await escrow.connect(a.regulator).openDispute(id);
+
+    await expect(escrow.connect(a.regulator).resolveDispute(id, true, ethers.ZeroHash)).to.be.revertedWithCustomError(
+      escrow,
+      "ZeroHash",
+    );
+    expect((await escrow.getCampaign(id)).status).to.equal(CS.Disputed);
+
+    await escrow.connect(a.regulator).resolveDispute(id, true, hashOf("keputusan"));
+    expect((await escrow.getCampaign(id)).status).to.equal(CS.Active);
+  });
+
+  // -------------------------------------------------------------------------
+  it("TC-23 [REQ-15, A-05] jendela verifikasi diatur ulang saat sengketa dilanjutkan", async function () {
+    const { escrow, ...a } = await deploy();
+    const id = await activeCampaign(escrow, a);
+    await escrow.connect(a.executor).submitEvidence(id, 0, hashOf("bukti-0"));
+
+    await escrow.connect(a.regulator).openDispute(id);
+    await advance(8 * DAY); // lebih lama dari verificationWindow 7 hari
+    await escrow.connect(a.regulator).resolveDispute(id, true, hashOf("keputusan"));
+
+    // Verifikator belum sempat menilai, jadi eskalasi langsung ditolak.
+    await expect(escrow.escalate(id, 0)).to.be.revertedWithCustomError(escrow, "VerificationWindowNotElapsed");
+
+    // Setelah jendela baru berakhir, eskalasi berjalan seperti biasa.
+    await advance(7 * DAY + 1);
+    await escrow.escalate(id, 0);
+    expect((await escrow.getMilestone(id, 0)).status).to.equal(MS.Escalated);
+  });
 });
