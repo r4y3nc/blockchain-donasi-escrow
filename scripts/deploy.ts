@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import hre from "hardhat";
 
 const NAMA_JARINGAN = "localhost";
@@ -50,10 +50,13 @@ const record = {
 mkdirSync("deployment", { recursive: true });
 writeFileSync("deployment/deployment-record.json", JSON.stringify(record, null, 2) + "\n");
 // Berkas untuk frontend: alamat, chain ID, dan ABI.
-writeFileSync(
-  "deployment/DonationEscrow.json",
-  JSON.stringify({ chainId: record.chainId, address, abi: artifact.abi }, null, 2) + "\n",
-);
+const berkasFrontend = JSON.stringify({ chainId: record.chainId, address, abi: artifact.abi }, null, 2) + "\n";
+writeFileSync("deployment/DonationEscrow.json", berkasFrontend);
+// Salinan untuk frontend, yang mengimpor berkas ini dari frontend/src/contract.
+if (existsSync("frontend/src/contract")) {
+  writeFileSync("frontend/src/contract/DonationEscrow.json", berkasFrontend);
+  console.log("Tersalin: frontend/src/contract/DonationEscrow.json");
+}
 
 console.log("Alamat kontrak:", address);
 console.log("Hash deployment:", deployReceipt.hash);

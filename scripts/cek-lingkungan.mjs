@@ -39,6 +39,22 @@ try {
   catat("Modul EDR (simulasi jaringan)", `GAGAL: ${String(e.message).split("\n")[0]}`, "gagal");
 }
 
+// 6. Akhir baris berkas kontrak. CRLF mengubah bytecode sehingga hash deployment berbeda dari record.
+try {
+  const dirs = ["contracts", "contracts/mocks"];
+  const crlf = dirs
+    .flatMap((d) => (fs.existsSync(d) ? fs.readdirSync(d).map((f) => `${d}/${f}`) : []))
+    .filter((f) => f.endsWith(".sol"))
+    .filter((f) => fs.readFileSync(f, "utf8").includes("\r\n"));
+  catat(
+    "Akhir baris kontrak",
+    crlf.length ? `CRLF pada ${crlf.join(", ")}. Hash deployment akan berbeda dari record` : "LF",
+    crlf.length ? "periksa" : "ok",
+  );
+} catch {
+  catat("Akhir baris kontrak", "tidak dapat diperiksa", "periksa");
+}
+
 const lebar = Math.max(...hasil.map((h) => h.nama.length));
 for (const h of hasil) {
   console.log(`${h.status.toUpperCase().padEnd(7)} ${h.nama.padEnd(lebar)}  ${h.nilai}`);

@@ -4,7 +4,7 @@ Tabel 1 Informasi deployment
 
 | Item | Nilai |
 |---|---|
-| Waktu | 2026-10-22T04:06:29.080Z |
+| Waktu | 2026-10-22T23:05:05.591Z |
 | Jaringan | localhost |
 | Chain ID | 31337 |
 | Kontrak | DonationEscrow |
@@ -35,7 +35,7 @@ Tabel 4 Transaksi alur end-to-end
 
 | No | Langkah | Hash transaksi | Blok | Gas | Event |
 |---|---|---|---|---|---|
-| 1 | createCampaign | 0x3250e64e4d2b27ef8ae829ed4fbd43e3f09f290ed10f8520c638d33b9583a210 | 5 | 263045 | CampaignCreated, CampaignTerms |
+| 1 | createCampaign | 0xb542ed92d176c7cfb8f804e3d9ffcc828927bbe1748d26e8e6794ceef45ee067 | 5 | 263045 | CampaignCreated, CampaignTerms |
 | 2 | donate donorA 0.6 | 0xd5b1e1b71d8fc986e846a2ffd9e0468faf2d03fe64ca2f4feabb24f54ecb166f | 6 | 72574 | Donated |
 | 3 | donate donorB 0.4 | 0x99ccb44bdb875c4c26a6077cb5dbddecbfab072e67f4ffb3fa6ffb803288d962 | 7 | 55474 | Donated |
 | 4 | finalizeFunding | 0x2fc75b2a5431c5956cf7b8af3a34851ba53890259ec04d454e17bb907e98caa0 | 8 | 32929 | FundingFinalized |

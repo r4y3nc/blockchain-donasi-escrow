@@ -1,0 +1,7 @@
+# Akhir baris dipaksa LF di semua mesin. Akhir baris CRLF mengubah metadata bytecode kontrak
+# sehingga hash transaksi deployment berbeda, walaupun alamat kontrak dan gas sama.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.pdf binary
+*.zip binary

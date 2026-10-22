@@ -1,11 +1,11 @@
 {
-  "waktu": "2026-10-22T04:35:19.649Z",
+  "waktu": "2026-10-22T23:05:05.591Z",
   "jaringan": "localhost",
   "chainId": "31337",
   "kontrak": "DonationEscrow",
   "alamatKontrak": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
   "transaksiDeployment": {
-    "hash": "0xd15e5a74d15da949e8aa88d4b23167dd0fc999342cdaa6d3d7608e30d23d28ee",
+    "hash": "0x6c040fed2b3b5020d75ffadcad209d9fa526258f0740bc5e469d46f2f8836846",
     "blok": 1,
     "gasUsed": "2646629"
   },
