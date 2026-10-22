@@ -16,5 +16,12 @@ export default defineConfig({
       type: "edr-simulated",
       chainType: "l1",
     },
+    // Node lokal yang dijalankan dengan `npm run node`. Tanpa kunci pribadi:
+    // akun uji disediakan oleh node itu sendiri.
+    localhost: {
+      type: "http",
+      chainType: "l1",
+      url: "http://127.0.0.1:8545",
+    },
   },
 });

@@ -6,7 +6,11 @@
     "compile": "hardhat compile",
     "test": "hardhat test",
     "test:gas": "hardhat test --gas-stats",
-    "cek": "node scripts/cek-lingkungan.mjs"
+    "cek": "node scripts/cek-lingkungan.mjs",
+    "node": "hardhat node",
+    "deploy:local": "hardhat run scripts/deploy.ts --network localhost",
+    "demo:local": "hardhat run scripts/demo.ts --network localhost",
+    "record": "node scripts/buat-record.mjs"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox-mocha-ethers": "^4.0.0",
