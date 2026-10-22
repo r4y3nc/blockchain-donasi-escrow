@@ -1,8 +1,10 @@
-# Node modules
-/node_modules
+# Node modules (root & frontend)
+node_modules/
+**/node_modules/
 
 # Compilation output
-/dist
+dist/
+**/dist/
 
 # pnpm deploy output
 /bundle
@@ -29,3 +31,7 @@
 
 # Snapshot cheatcodes output
 /snapshots
+
+.agents
+AGENTS.md
+

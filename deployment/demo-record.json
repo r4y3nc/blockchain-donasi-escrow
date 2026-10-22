@@ -1,12 +1,12 @@
 {
-  "waktu": "2026-10-22T04:07:59.820Z",
+  "waktu": "2026-10-22T04:35:35.157Z",
   "chainId": "31337",
   "alamatKontrak": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
   "transaksi": [
     {
       "no": 1,
       "langkah": "createCampaign",
-      "hash": "0x3250e64e4d2b27ef8ae829ed4fbd43e3f09f290ed10f8520c638d33b9583a210",
+      "hash": "0xb3e86f8770edb03d724b968c87ec730edaa5c8c689fd21f5ba6a0ba8578a9bf4",
       "blok": 5,
       "gas": "263045",
       "event": [

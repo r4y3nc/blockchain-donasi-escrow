@@ -93,7 +93,16 @@ Catatan: `demo:local` memajukan waktu node dua hari untuk melewati challenge win
 
 ## Frontend
 
-[ISI oleh anggota kelompok yang mengerjakan frontend: dependensi, perintah instalasi, perintah menjalankan, cara menyambungkan wallet atau provider ke node lokal, dan alamat kontrak yang dipakai. Frontend membaca alamat, chain ID, dan ABI dari `deployment/DonationEscrow.json`.]
+Frontend aplikasi berbasis Vite + React + TypeScript terletak pada folder `frontend/`. Aplikasi membaca alamat kontrak, chain ID, dan ABI langsung dari `deployment/DonationEscrow.json`.
+
+Langkah menjalankan frontend:
+```bash
+cd frontend
+npm install
+npm run dev
+```
+Aplikasi berjalan pada `http://localhost:3000`. Pastikan MetaMask atau browser wallet terhubung ke jaringan Hardhat Localhost (`http://127.0.0.1:8545`, Chain ID: 31337).
+
 
 ## Ringkasan audit
 
