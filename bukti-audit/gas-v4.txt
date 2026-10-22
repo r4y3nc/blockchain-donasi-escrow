@@ -1,0 +1,102 @@
+No contracts to compile
+
+Running Solidity tests
+
+
+Running Mocha tests
+
+
+  DonationEscrow
+    ✔ TC-01 [REQ-01,03,04,05,16] alur normal: tiga milestone sampai Completed (87ms)
+    ✔ TC-02 [REQ-02] menolak total porsi milestone selain 10000 (46ms)
+    ✔ TC-03 [REQ-10] akun yang belum disetujui tidak dapat membuat kampanye
+    ✔ TC-04 [REQ-14] verifikator tidak boleh sama dengan organizer atau pelaksana
+    ✔ TC-05 [REQ-01,10] organizer tidak dapat menarik dana escrow langsung
+    ✔ TC-06 [REQ-03,10] pemanggil tidak berwenang ditolak pada fungsi sensitif (41ms)
+    ✔ TC-07 [REQ-07] biaya operasional di atas batas ditolak
+    ✔ TC-08 [REQ-06] kampanye gagal target: refund penuh dan tidak dapat ganda
+    ✔ TC-09 [REQ-08] sengketa: ambang donatur, pembekuan release, lalu dilanjutkan Regulator (53ms)
+    ✔ TC-10 [REQ-16] release baru berhasil setelah challenge window
+    ✔ TC-11 [REQ-12] saat pause: donate dan withdraw diblokir, refund tetap berjalan (53ms)
+    ✔ TC-12 [REQ-11] pencabutan verifikator berlaku seketika dan penggantian menjaga dana dan riwayat (40ms)
+    ✔ TC-13 [REQ-15] verifikator tidak merespons: eskalasi, bukan pelepasan otomatis
+    ✔ TC-14 [REQ-01,06] pembatalan setelah pelepasan sebagian: refund pro-rata dan saldo mencukupi (49ms)
+    ✔ TC-15 [REQ-13] urutan event audit pada siklus lengkap satu milestone
+    ✔ TC-16a [REQ-01] re-entrancy pada refund hanya membayar satu kali (50ms)
+    ✔ TC-16b [REQ-01] re-entrancy pada withdraw hanya membayar satu kali (51ms)
+    ✔ TC-18 [REQ-02,06] pembulatan: total dilepas tepat sama dengan total terkumpul (63ms)
+    ✔ TC-19 [REQ-03,04] urutan milestone, hash nol, dan siklus tolak lalu ajukan ulang (47ms)
+    ✔ TC-17 [REQ-09] inspeksi ABI: tidak ada tipe string atau bytes dinamis (tanpa data pribadi)
+    ✔ TC-20 [REQ-08, A-01] donatur hanya dapat membuka satu sengketa per kampanye (42ms)
+    ✔ TC-21 [REQ-02, A-02] tenggat pendanaan dibatasi paling lama 365 hari
+    ✔ TC-22 [REQ-08, A-04] keputusan sengketa wajib memuat hash dokumen (41ms)
+    ✔ TC-23 [REQ-15, A-05] jendela verifikasi diatur ulang saat sengketa dilanjutkan (45ms)
+    ✔ TC-24 [REQ-16, A-03] perubahan jendela oleh Regulator tidak berlaku surut pada kampanye berjalan (46ms)
+
+
+  25 passing (1s)
+
+
+25 passing (25 mocha)
+
+╔═════════════════════════════════════════════════════════════════════════════╗
+║                            Gas Usage Statistics                             ║
+╚═════════════════════════════════════════════════════════════════════════════╝
+╔═════════════════════════════════════════════════════════════════════════════╗
+║ contracts/DonationEscrow.sol:DonationEscrow                                 ║
+╟──────────────────────┬─────────┬─────────┬─────────┬─────────┬──────────────╢
+║ Function name        │ Min     │ Average │ Median  │ Max     │ #calls       ║
+╟──────────────────────┼─────────┼─────────┼─────────┼─────────┼──────────────╢
+║ approveMilestone     │ 37745   │ 37748   │ 37745   │ 37757   │ 16           ║
+║ campaignCount        │ 23448   │ 23448   │ 23448   │ 23448   │ 24           ║
+║ campaignWindows      │ 23801   │ 23801   │ 23801   │ 23801   │ 2            ║
+║ cancelCampaign       │ 28720   │ 28720   │ 28720   │ 28720   │ 1            ║
+║ claimable            │ 24082   │ 24082   │ 24082   │ 24082   │ 11           ║
+║ createCampaign       │ 215673  │ 256949  │ 263033  │ 263045  │ 24           ║
+║ donate               │ 55474   │ 65245   │ 72574   │ 72574   │ 35           ║
+║ escalate             │ 35630   │ 35630   │ 35630   │ 35630   │ 2            ║
+║ finalizeFunding      │ 32929   │ 32954   │ 32929   │ 33097   │ 20           ║
+║ getCampaign          │ 37957   │ 37957   │ 37957   │ 37957   │ 12           ║
+║ getMilestone         │ 29319   │ 29321   │ 29319   │ 29331   │ 12           ║
+║ maxOpCostBps         │ 23452   │ 23452   │ 23452   │ 23452   │ 1            ║
+║ openDispute          │ 28557   │ 43157   │ 43157   │ 57757   │ 6            ║
+║ pause                │ 27524   │ 27524   │ 27524   │ 27524   │ 1            ║
+║ refund               │ 60194   │ 62039   │ 60194   │ 64807   │ 5            ║
+║ refunded             │ 24308   │ 24308   │ 24308   │ 24308   │ 1            ║
+║ rejectMilestone      │ 38110   │ 38110   │ 38110   │ 38110   │ 1            ║
+║ release              │ 57112   │ 94911   │ 108400  │ 112475  │ 14           ║
+║ replaceVerifier      │ 47194   │ 47266   │ 47266   │ 47337   │ 2            ║
+║ resolveDispute       │ 37164   │ 37783   │ 37176   │ 40222   │ 5            ║
+║ setOrganizerApproval │ 45729   │ 45729   │ 45729   │ 45729   │ 24           ║
+║ setParams            │ 29759   │ 29759   │ 29759   │ 29759   │ 1            ║
+║ setVerifierApproval  │ 23882   │ 45370   │ 45806   │ 45806   │ 51           ║
+║ submitEvidence       │ 41533   │ 58079   │ 58487   │ 60889   │ 18           ║
+║ unpause              │ 27518   │ 27518   │ 27518   │ 27518   │ 1            ║
+║ withdraw             │ 34624   │ 34624   │ 34624   │ 34624   │ 8            ║
+╟──────────────────────┼─────────┼─────────┼─────────┼─────────┼──────────────╢
+║ Deployment           │ Min     │ Average │ Median  │ Max     │ #deployments ║
+╟──────────────────────┼─────────┼─────────┼─────────┼─────────┼──────────────╢
+║                      │ 2646629 │ 2646629 │ 2646629 │ 2646629 │ 24           ║
+╟──────────────────────┼─────────┼─────────┴─────────┴─────────┴──────────────╢
+║ Bytecode size        │ 11784   │                                            ║
+╚══════════════════════╧═════════╧════════════════════════════════════════════╝
+╔═════════════════════════════════════════════════════════════════════════════╗
+║ contracts/mocks/ReentrancyAttacker.sol:ReentrancyAttacker                   ║
+╟──────────────────────┬─────────┬─────────┬─────────┬─────────┬──────────────╢
+║ Function name        │ Min     │ Average │ Median  │ Max     │ #calls       ║
+╟──────────────────────┼─────────┼─────────┼─────────┼─────────┼──────────────╢
+║ arm                  │ 69338   │ 91600   │ 91600   │ 113862  │ 2            ║
+║ exec                 │ 63067   │ 88911   │ 86607   │ 119364  │ 4            ║
+║ fund                 │ 21225   │ 21225   │ 21225   │ 21225   │ 1            ║
+║ received             │ 23358   │ 23358   │ 23358   │ 23358   │ 2            ║
+║ reentryAttempted     │ 23418   │ 23418   │ 23418   │ 23418   │ 2            ║
+║ reentrySucceeded     │ 23451   │ 23451   │ 23451   │ 23451   │ 2            ║
+╟──────────────────────┼─────────┼─────────┼─────────┼─────────┼──────────────╢
+║ Deployment           │ Min     │ Average │ Median  │ Max     │ #deployments ║
+╟──────────────────────┼─────────┼─────────┼─────────┼─────────┼──────────────╢
+║                      │ 499484  │ 499484  │ 499484  │ 499484  │ 2            ║
+╟──────────────────────┼─────────┼─────────┴─────────┴─────────┴──────────────╢
+║ Bytecode size        │ 2066    │                                            ║
+╚══════════════════════╧═════════╧════════════════════════════════════════════╝
+
+

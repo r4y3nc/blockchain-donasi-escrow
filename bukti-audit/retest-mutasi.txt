@@ -1,0 +1,29 @@
+== Retest 2: uji mutasi pada perbaikan. Perbaikan dibatalkan satu per satu, test yang gagal dicatat ==
+
+M-A01 hapus pemeriksaan disputeUsed
+    1) TC-20 [REQ-08, A-01] donatur hanya dapat membuka satu sengketa per kampanye
+  1 failing
+  23 passing (789ms)
+1 failing (1 mocha)
+23 passing (23 mocha)
+
+M-A02 hapus batas atas tenggat
+    1) TC-21 [REQ-02, A-02] tenggat pendanaan dibatasi paling lama 365 hari
+  1 failing
+  23 passing (942ms)
+1 failing (1 mocha)
+23 passing (23 mocha)
+
+M-A04 hapus penolakan hash nol
+    1) TC-22 [REQ-08, A-04] keputusan sengketa wajib memuat hash dokumen
+  1 failing
+  23 passing (953ms)
+1 failing (1 mocha)
+23 passing (23 mocha)
+
+M-A05 hapus pengaturan ulang jendela verifikasi
+    1) TC-23 [REQ-15, A-05] jendela verifikasi diatur ulang saat sengketa dilanjutkan
+  1 failing
+  23 passing (822ms)
+1 failing (1 mocha)
+23 passing (23 mocha)

@@ -1,0 +1,44 @@
+0.11.6
+solc: Version: 0.8.34+commit.80d5c536.Linux.g++
+kontrak: DonationEscrow.sol md5 89aa1e05d5f59a2a37537a0c05e67009
+perintah: slither contracts/DonationEscrow.sol --solc solc-0.8.34 --filter-paths node_modules
+---
+Multiple frameworks detected: solc, Solc-json. Using solc (highest priority). Use --compile-force-framework to override.
+'/tmp/solcbin/solc --version' running
+'/tmp/solcbin/solc @openzeppelin=node_modules/@openzeppelin contracts/DonationEscrow.sol --combined-json abi,ast,bin,bin-runtime,srcmap,srcmap-runtime,userdoc,devdoc,hashes --allow-paths .' running
+INFO:Detectors:
+Detector: divide-before-multiply
+DonationEscrow.release(uint256,uint8) (contracts/DonationEscrow.sol#337-359) performs a multiplication on the result of a division:
+	- op = (gross * c.opCostBps) / BPS (contracts/DonationEscrow.sol#347)
+	- gross = (c.totalRaised * ms.shareBps) / BPS (contracts/DonationEscrow.sol#346)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#divide-before-multiply
+INFO:Detectors:
+Detector: uninitialized-local
+DonationEscrow._validateShares(uint16[]).total (contracts/DonationEscrow.sol#499) is a local variable never initialized
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#uninitialized-local-variables
+INFO:Detectors:
+Detector: timestamp
+DonationEscrow.createCampaign(bytes32,uint256,uint64,uint16,address,address,uint16[]) (contracts/DonationEscrow.sol#217-256) uses timestamp for comparisons
+	Dangerous comparisons:
+	- fundingTarget == 0 || fundingDeadline <= block.timestamp || verifier == address(0) || executor == address(0) (contracts/DonationEscrow.sol#228-231)
+DonationEscrow.donate(uint256) (contracts/DonationEscrow.sol#258-266) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp >= c.fundingDeadline (contracts/DonationEscrow.sol#261)
+DonationEscrow.finalizeFunding(uint256) (contracts/DonationEscrow.sol#270-281) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp >= c.fundingDeadline (contracts/DonationEscrow.sol#275)
+DonationEscrow.escalate(uint256,uint8) (contracts/DonationEscrow.sol#326-334) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp < uint256(ms.submittedAt) + verificationWindow (contracts/DonationEscrow.sol#331)
+DonationEscrow.release(uint256,uint8) (contracts/DonationEscrow.sol#337-359) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp < uint256(ms.approvedAt) + challengeWindow (contracts/DonationEscrow.sol#342)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#block-timestamp
+INFO:Detectors:
+Detector: low-level-calls
+Low level call in DonationEscrow.refund(uint256) (contracts/DonationEscrow.sol#435-452):
+	- (ok,None) = msg.sender.call{value: due}() (contracts/DonationEscrow.sol#449)
+Low level call in DonationEscrow.withdraw() (contracts/DonationEscrow.sol#455-462):
+	- (ok,None) = msg.sender.call{value: amount}() (contracts/DonationEscrow.sol#460)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#low-level-calls
+INFO:Slither:contracts/DonationEscrow.sol analyzed (3 contracts with 102 detectors), 9 result(s) found

@@ -1,0 +1,14 @@
+== Retest 1: PoC lama dijalankan terhadap kontrak v3 (hasil gagal berarti celah sudah tertutup) ==
+    1) PoC-A01: donatur ambang dapat membuka sengketa berulang setelah Regulator melanjutkan
+    2) PoC-A02: tenggat pendanaan sangat jauh mengunci dana donatur
+    ✔ PoC-A03: Regulator dapat memperpendek challenge window pada milestone yang sedang berjalan (54ms)
+    3) PoC-A04: resolveDispute menerima decisionHash nol
+    4) PoC-A05: jendela verifikasi tetap berjalan selama Disputed sehingga eskalasi dapat langsung dipanggil setelah sengketa
+  1 passing (242ms)
+  4 failing
+  1) PoC temuan audit
+  2) PoC temuan audit
+  3) PoC temuan audit
+  4) PoC temuan audit
+1 passing (1 mocha)
+4 failing (4 mocha)
