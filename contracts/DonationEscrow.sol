@@ -78,6 +78,13 @@ contract DonationEscrow is ReentrancyGuard {
     mapping(uint256 => Campaign) private _campaigns;
     mapping(uint256 => mapping(uint8 => Milestone)) private _milestones;
     mapping(uint256 => mapping(address => uint256)) public contributions;
+
+    /// @dev Jendela disalin dari parameter global saat kampanye dibuat. Mitigasi A-03.
+    struct Windows {
+        uint64 verification;
+        uint64 challenge;
+    }
+    mapping(uint256 => Windows) public campaignWindows;
     mapping(uint256 => mapping(address => bool)) public refunded;
     /// @notice Donatur hanya boleh membuka satu sengketa per kampanye (mitigasi A-01 dan R-06).
     mapping(uint256 => mapping(address => bool)) public disputeUsed;
@@ -251,6 +258,7 @@ contract DonationEscrow is ReentrancyGuard {
         c.executor = executor;
         c.metadataHash = metadataHash;
         c.fundingTarget = fundingTarget;
+        campaignWindows[id] = Windows(verificationWindow, challengeWindow); // mitigasi A-03
         for (uint256 i = 0; i < shares.length; ++i) {
             _milestones[id][uint8(i)].shareBps = shares[i];
         }
@@ -332,7 +340,7 @@ contract DonationEscrow is ReentrancyGuard {
         if (c.status != CampaignStatus.Active) revert WrongState();
         Milestone storage ms = _milestone(id, c, m);
         if (ms.status != MilestoneStatus.Submitted) revert WrongState();
-        if (block.timestamp < uint256(ms.submittedAt) + verificationWindow) revert VerificationWindowNotElapsed();
+        if (block.timestamp < uint256(ms.submittedAt) + campaignWindows[id].verification) revert VerificationWindowNotElapsed();
         ms.status = MilestoneStatus.Escalated;
         emit MilestoneEscalated(id, m);
     }
@@ -343,7 +351,7 @@ contract DonationEscrow is ReentrancyGuard {
         if (c.status != CampaignStatus.Active) revert WrongState();
         Milestone storage ms = _milestone(id, c, m);
         if (ms.status != MilestoneStatus.Approved) revert WrongState();
-        if (block.timestamp < uint256(ms.approvedAt) + challengeWindow) revert ChallengeWindowOpen();
+        if (block.timestamp < uint256(ms.approvedAt) + campaignWindows[id].challenge) revert ChallengeWindowOpen();
 
         bool last = (m == c.milestoneCount - 1);
         // Milestone terakhir menerima sisa agar pembulatan tidak menyisakan dana tertahan.

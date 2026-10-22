@@ -679,4 +679,30 @@ describe("DonationEscrow", function () {
     await escrow.escalate(id, 0);
     expect((await escrow.getMilestone(id, 0)).status).to.equal(MS.Escalated);
   });
+
+  // -------------------------------------------------------------------------
+  it("TC-24 [REQ-16, A-03] perubahan jendela oleh Regulator tidak berlaku surut pada kampanye berjalan", async function () {
+    const { escrow, ...a } = await deploy();
+    const id = await activeCampaign(escrow, a);
+    await escrow.connect(a.executor).submitEvidence(id, 0, hashOf("bukti-0"));
+    await escrow.connect(a.verifier).approveMilestone(id, 0);
+
+    // Regulator memperpendek jendela menjadi 1 detik setelah kampanye berjalan.
+    await escrow.connect(a.regulator).setParams(1000, 1, 1, 500);
+    await advance(2);
+
+    // Kampanye lama tetap memakai jendela saat dibuat: challenge window 2 hari masih berjalan.
+    const w = await escrow.campaignWindows(id);
+    expect(w.verification).to.equal(7n * BigInt(DAY));
+    expect(w.challenge).to.equal(2n * BigInt(DAY));
+    await expect(escrow.release(id, 0)).to.be.revertedWithCustomError(escrow, "ChallengeWindowOpen");
+    await advance(2 * DAY);
+    await escrow.release(id, 0);
+
+    // Kampanye baru memakai jendela terbaru.
+    const id2 = await createCampaign(escrow, a);
+    const w2 = await escrow.campaignWindows(id2);
+    expect(w2.verification).to.equal(1n);
+    expect(w2.challenge).to.equal(1n);
+  });
 });
