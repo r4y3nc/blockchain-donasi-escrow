@@ -1,0 +1,7 @@
+    ✔ PoC-A01: donatur ambang dapat membuka sengketa berulang setelah Regulator melanjutkan (58ms)
+    ✔ PoC-A02: tenggat pendanaan sangat jauh mengunci dana donatur (45ms)
+    ✔ PoC-A03: Regulator dapat memperpendek challenge window pada milestone yang sedang berjalan (45ms)
+    ✔ PoC-A04: resolveDispute menerima decisionHash nol
+    ✔ PoC-A05: jendela verifikasi tetap berjalan selama Disputed sehingga eskalasi dapat langsung dipanggil setelah sengketa
+  5 passing (215ms)
+5 passing (5 mocha)

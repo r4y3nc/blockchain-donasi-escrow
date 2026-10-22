@@ -1,0 +1,6 @@
+== Retest 4: mutasi M-A03, jendela per kampanye diganti kembali ke parameter global ==
+    1) TC-24 [REQ-16, A-03] perubahan jendela oleh Regulator tidak berlaku surut pada kampanye berjalan
+  24 passing (853ms)
+  1 failing
+24 passing (24 mocha)
+1 failing (1 mocha)
