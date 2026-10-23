@@ -10,6 +10,7 @@ import { DashboardEscrow } from "./components/DashboardEscrow";
 import { DemoAccountsModal } from "./components/DemoAccountsModal";
 import { ConnectWalletModal } from "./components/ConnectWalletModal";
 import { CreateCampaignModal } from "./components/CreateCampaignModal";
+import { OperatorSidebarLayout } from "./components/OperatorSidebarLayout";
 import { useEscrow } from "./hooks/useEscrow";
 import { useWeb3 } from "./context/Web3Context";
 import { Campaign, CampaignStatus } from "./types/escrow";
@@ -43,9 +44,10 @@ export const App: React.FC = () => {
     withdraw,
     openDispute,
     createCampaign,
+    fastForwardTime,
   } = useEscrow();
 
-  const { userRole } = useWeb3();
+  const { account, userRole } = useWeb3();
 
   const [activeTab, setActiveTab] = useState<"campaigns" | "my-donations" | "escrow-mgmt">("campaigns");
   const [selectedCategory, setSelectedCategory] = useState<string>("Semua");
@@ -56,6 +58,7 @@ export const App: React.FC = () => {
   const [isDemoGuideOpen, setIsDemoGuideOpen] = useState<boolean>(false);
   const [isCreateCampaignOpen, setIsCreateCampaignOpen] = useState<boolean>(false);
   const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [isPublicPreviewMode, setIsPublicPreviewMode] = useState<boolean>(false);
 
   // Simpan doa donatur
   const [prayers, setPrayers] = useState<DonorPrayer[]>(DEFAULT_PRAYERS);
@@ -179,9 +182,103 @@ export const App: React.FC = () => {
   });
 
   const totalEthRaised = campaigns.reduce((acc, c) => acc + parseFloat(formatEther(c.totalRaised)), 0);
+  const isCampaignExecutor = campaigns.some(
+    (c) => account && c.executor.toLowerCase() === account.toLowerCase()
+  );
+  const isDemoExecutor =
+    account && account.toLowerCase() === "0x15d34AAf54267DB7D7c367839AAf71A00a2C6A65".toLowerCase();
+  const isExecutor = userRole.isExecutor || isCampaignExecutor || !!isDemoExecutor;
+  const isOperator = userRole.isOrganizer || userRole.isVerifier || isExecutor || userRole.isRegulator;
+
+  // Tampilan Konsol Sidebar Khusus Akun Operasional (Selain Donatur)
+  if (isOperator && !isPublicPreviewMode) {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+        <OperatorSidebarLayout
+          campaigns={campaigns}
+          theme={theme}
+          onToggleTheme={toggleTheme}
+          onOpenDemoGuide={() => setIsDemoGuideOpen(true)}
+          onSelectCampaign={(c) => setSelectedCampaign(c)}
+          onWithdraw={withdraw}
+          onCreateCampaign={createCampaign}
+          onSubmitEvidence={submitEvidence}
+          onApproveMilestone={approveMilestone}
+          onRejectMilestone={rejectMilestone}
+          onSwitchToPublic={() => setIsPublicPreviewMode(true)}
+        />
+
+        {/* MODAL: DETAIL KAMPANYE LENGKAP */}
+        {selectedCampaign && (
+          <CampaignDetailModal
+            campaign={selectedCampaign}
+            userContribution={userContributions[selectedCampaign.id] || { amount: 0n, refunded: false, disputeUsed: false }}
+            prayers={prayers}
+            onClose={() => setSelectedCampaign(null)}
+            onOpenDonate={(c) => {
+              setSelectedCampaign(null);
+              setDonatingCampaign(c);
+            }}
+            onFinalizeFunding={finalizeFunding}
+            onSubmitEvidence={submitEvidence}
+            onApproveMilestone={approveMilestone}
+            onRejectMilestone={rejectMilestone}
+            onEscalate={escalate}
+            onRelease={release}
+            onRefund={refund}
+            onOpenDispute={openDispute}
+          />
+        )}
+
+        {/* MODAL: FORMULIR DONASI */}
+        {donatingCampaign && (
+          <DonateModal
+            campaign={donatingCampaign}
+            onClose={() => setDonatingCampaign(null)}
+            onDonate={handleDonateWithPrayer}
+          />
+        )}
+
+        {/* MODAL: STATUS TRANSAKSI BLOCKCHAIN NYATA */}
+        <TransactionModal txState={txState} onClose={closeTxModal} onFastForwardTime={fastForwardTime} />
+
+        {/* MODAL: PANDUAN AKUN UJI HARDHAT */}
+        {isDemoGuideOpen && (
+          <DemoAccountsModal onClose={() => setIsDemoGuideOpen(false)} />
+        )}
+
+        {/* MODAL: FORMULIR BUAT PENGGALANGAN DANA BARU */}
+        <CreateCampaignModal
+          isOpen={isCreateCampaignOpen}
+          onClose={() => setIsCreateCampaignOpen(false)}
+          onCreate={handleCreateCampaign}
+        />
+
+        {/* MODAL: PILIHAN HUBUNGKAN DOMPET */}
+        <ConnectWalletModal />
+      </div>
+    );
+  }
 
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+      {/* Banner Mode Tinjau Publik Khusus Operator */}
+      {isOperator && isPublicPreviewMode && (
+        <div className="operator-preview-banner">
+          <span>
+            👁️ Mode Tinjau Publik Aktif. Anda melihat tampilan dari sudut pandang donatur umum.
+          </span>
+          <button
+            type="button"
+            onClick={() => setIsPublicPreviewMode(false)}
+            className="btn-secondary"
+            style={{ minHeight: "30px", fontSize: "0.8rem", padding: "0.2rem 0.65rem", background: "white", color: "#0f766e", fontWeight: 700 }}
+          >
+            ← Kembali ke Konsol Sidebar
+          </button>
+        </div>
+      )}
+
       <Navbar
         onOpenDemoGuide={() => setIsDemoGuideOpen(true)}
         theme={theme}
@@ -455,7 +552,7 @@ export const App: React.FC = () => {
       )}
 
       {/* MODAL: STATUS TRANSAKSI BLOCKCHAIN NYATA */}
-      <TransactionModal txState={txState} onClose={closeTxModal} />
+      <TransactionModal txState={txState} onClose={closeTxModal} onFastForwardTime={fastForwardTime} />
 
       {/* MODAL: PANDUAN AKUN UJI HARDHAT */}
       {isDemoGuideOpen && (
@@ -477,7 +574,7 @@ export const App: React.FC = () => {
         <div className="container footer-content">
           <div>
             <div style={{ fontWeight: 800, fontSize: "1.05rem", color: "var(--color-primary)", marginBottom: "0.2rem" }}>
-              AmanahBisa
+              DonationEscrow DApp
             </div>
             <div>Platform Donasi Gotong Royong Berbasis Escrow Blockchain & Verifikator Independen</div>
           </div>

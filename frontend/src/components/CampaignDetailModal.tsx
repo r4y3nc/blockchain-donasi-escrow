@@ -10,6 +10,7 @@ import {
 import { useWeb3 } from "../context/Web3Context";
 import { getCampaignMetadata, DonorPrayer } from "../types/campaignMetadata";
 import { formatRupiah, ethToIdr } from "../utils/currency";
+import { calculateFileKeccak256, formatFileSize } from "../utils/hashHelper";
 
 interface CampaignDetailModalProps {
   campaign: Campaign;
@@ -42,9 +43,10 @@ export const CampaignDetailModal: React.FC<CampaignDetailModalProps> = ({
   onRefund,
   onOpenDispute,
 }) => {
-  const { account } = useWeb3();
+  const { account, userRole } = useWeb3();
   const [activeTab, setActiveTab] = useState<"story" | "escrow" | "prayers">("story");
   const [evidenceInput, setEvidenceInput] = useState<string>("");
+  const [fileInfo, setFileInfo] = useState<{ name: string; size: string } | null>(null);
   const [rejectReasonCode, setRejectReasonCode] = useState<number>(1);
   const [activeActionMilestone, setActiveActionMilestone] = useState<number | null>(null);
 
@@ -84,6 +86,7 @@ export const CampaignDetailModal: React.FC<CampaignDetailModalProps> = ({
     const ok = await onSubmitEvidence(campaign.id, mIndex, evidenceInput.trim());
     if (ok) {
       setEvidenceInput("");
+      setFileInfo(null);
       setActiveActionMilestone(null);
     }
   };
@@ -174,19 +177,43 @@ export const CampaignDetailModal: React.FC<CampaignDetailModalProps> = ({
               <div className="progress-bar-fill" style={{ width: `${percent}%` }} />
             </div>
 
-            {/* Tombol Donasi Utama */}
+            {/* Tombol Donasi Utama / Peringatan Regulator */}
             {campaign.status === CampaignStatus.Funding && !isExpired && (
-              <button
-                type="button"
-                onClick={() => {
-                  onClose();
-                  onOpenDonate(campaign);
-                }}
-                className="btn-primary"
-                style={{ width: "100%", marginTop: "0.5rem", fontSize: "1.05rem" }}
-              >
-                Donasi Sekarang
-              </button>
+              userRole.isRegulator ? (
+                <div
+                  style={{
+                    marginTop: "0.75rem",
+                    padding: "0.85rem 1rem",
+                    backgroundColor: "rgba(126, 34, 206, 0.08)",
+                    border: "1px solid #d8b4fe",
+                    borderRadius: "var(--radius-sm)",
+                    color: "#6b21a8",
+                    fontSize: "0.85rem",
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: "0.6rem",
+                    lineHeight: 1.45,
+                  }}
+                >
+                  <span style={{ fontSize: "1.1rem" }}>⚖️</span>
+                  <div>
+                    <strong style={{ display: "block", marginBottom: "0.15rem" }}>Pemberitahuan Tata Kelola (Regulator):</strong>
+                    <span>Akun Regulator dilarang berdonasi demi menjaga netralitas dan independensi pengawasan sengketa.</span>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onOpenDonate(campaign);
+                  }}
+                  className="btn-primary"
+                  style={{ width: "100%", marginTop: "0.5rem", fontSize: "1.05rem" }}
+                >
+                  Donasi Sekarang
+                </button>
+              )
             )}
 
             {(targetReached || isExpired) && campaign.status === CampaignStatus.Funding && (
@@ -321,6 +348,37 @@ export const CampaignDetailModal: React.FC<CampaignDetailModalProps> = ({
                 </div>
               )}
 
+              {/* Status Banner Penggalangan Dana */}
+              {campaign.status === CampaignStatus.Funding && (
+                <div style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border-subtle)", borderLeft: "4px solid var(--color-warning)", borderRadius: "var(--radius-sm)", padding: "0.85rem", marginBottom: "1.25rem" }}>
+                  <div style={{ fontWeight: 700, color: "var(--text-main)", marginBottom: "0.25rem" }}>
+                    📢 Program Masih Dalam Masa Penggalangan Dana ({percent}% Terkumpul)
+                  </div>
+                  <div style={{ fontSize: "0.82rem", color: "var(--text-muted)", lineHeight: 1.5 }}>
+                    Tahapan pengerjaan lapangan (unggah bukti oleh Pelaksana dan verifikasi pencairan oleh Lembaga Audit) baru akan dibuka oleh smart contract setelah donasi terkumpul 100% dan status difinalisasi.
+                  </div>
+                  {targetReached ? (
+                    <button
+                      type="button"
+                      onClick={() => onFinalizeFunding(campaign.id)}
+                      className="btn-teal"
+                      style={{ marginTop: "0.6rem", minHeight: "36px", padding: "0.3rem 0.8rem", fontSize: "0.82rem", fontWeight: 700 }}
+                    >
+                      ⚡ Target Tercapai! Klik untuk Finalisasi & Buka Tahap Milestone
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => onOpenDonate(campaign)}
+                      className="btn-primary"
+                      style={{ marginTop: "0.6rem", minHeight: "36px", padding: "0.3rem 0.8rem", fontSize: "0.82rem" }}
+                    >
+                      Donasi Sekarang untuk Melengkapi Target
+                    </button>
+                  )}
+                </div>
+              )}
+
               {/* Daftar Tahapan Milestone dalam Rupiah */}
               <div className="milestone-timeline">
                 {campaign.milestones.map((m) => {
@@ -354,7 +412,7 @@ export const CampaignDetailModal: React.FC<CampaignDetailModalProps> = ({
 
                       {/* Tombol Tindakan Berdasarkan Peran On-Chain */}
                       {campaign.status === CampaignStatus.Active && (
-                        <div style={{ marginTop: "0.75rem", display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                        <div style={{ marginTop: "0.75rem", display: "flex", gap: "0.5rem", flexWrap: "wrap", alignItems: "center" }}>
                           {isExecutor && (m.status === MilestoneStatus.Pending || m.status === MilestoneStatus.Rejected) && (
                             <button
                               type="button"
@@ -387,6 +445,18 @@ export const CampaignDetailModal: React.FC<CampaignDetailModalProps> = ({
                             </>
                           )}
 
+                          {isVerifier && m.status === MilestoneStatus.Pending && (
+                            <span style={{ fontSize: "0.8rem", color: "var(--text-muted)", fontStyle: "italic" }}>
+                              ⏳ Menunggu Pelaksana mengunggah bukti lapangan sebelum tombol persetujuan aktif.
+                            </span>
+                          )}
+
+                          {!isVerifier && !isExecutor && (
+                            <span style={{ fontSize: "0.78rem", color: "var(--text-dim)" }}>
+                              Pihak Penyetujui: Verifikator Independen ({campaign.verifier.slice(0, 6)}...{campaign.verifier.slice(-4)})
+                            </span>
+                          )}
+
                           {m.status === MilestoneStatus.Approved && (
                             <button
                               type="button"
@@ -414,6 +484,31 @@ export const CampaignDetailModal: React.FC<CampaignDetailModalProps> = ({
                       {/* Sub-form Pelaksana */}
                       {activeActionMilestone === m.index && isExecutor && (
                         <div style={{ marginTop: "0.75rem", padding: "0.75rem", backgroundColor: "var(--bg-card)", borderRadius: "var(--radius-sm)", border: "1px solid var(--border-subtle)" }}>
+                          <label className="form-label" style={{ fontSize: "0.8rem", marginBottom: "0.3rem" }}>
+                            Pilih Dokumen Bukti Lapangan (Foto / Nota / PDF):
+                          </label>
+                          <div style={{ border: "1px dashed var(--border-subtle)", borderRadius: "var(--radius-sm)", padding: "0.5rem", marginBottom: "0.5rem", backgroundColor: "var(--bg-card-subtle)" }}>
+                            <input
+                              type="file"
+                              accept="image/*,.pdf"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const hash = await calculateFileKeccak256(file);
+                                  setEvidenceInput(hash);
+                                  setFileInfo({ name: file.name, size: formatFileSize(file.size) });
+                                }
+                              }}
+                              style={{ fontSize: "0.8rem", width: "100%" }}
+                            />
+                          </div>
+
+                          {fileInfo && (
+                            <div style={{ fontSize: "0.78rem", color: "var(--color-teal)", marginBottom: "0.5rem", fontWeight: 600 }}>
+                              ✓ Berkas terbaca: {fileInfo.name} ({fileInfo.size})
+                            </div>
+                          )}
+
                           <label className="form-label" style={{ fontSize: "0.8rem" }}>
                             Hash Dokumen Bukti Lapangan (bytes32):
                           </label>
@@ -423,9 +518,9 @@ export const CampaignDetailModal: React.FC<CampaignDetailModalProps> = ({
                             value={evidenceInput}
                             onChange={(e) => setEvidenceInput(e.target.value)}
                             className="form-input"
-                            style={{ fontSize: "0.85rem", minHeight: "38px", marginBottom: "0.5rem" }}
+                            style={{ fontSize: "0.85rem", minHeight: "38px", marginBottom: "0.5rem", fontFamily: "monospace" }}
                           />
-                          <div style={{ display: "flex", gap: "0.5rem" }}>
+                          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
                             <button
                               type="button"
                               onClick={() => handleEvidenceSubmit(m.index)}
@@ -436,7 +531,10 @@ export const CampaignDetailModal: React.FC<CampaignDetailModalProps> = ({
                             </button>
                             <button
                               type="button"
-                              onClick={() => setEvidenceInput("0x" + "aa".repeat(32))}
+                              onClick={() => {
+                                setEvidenceInput("0x" + "aa".repeat(32));
+                                setFileInfo(null);
+                              }}
                               className="btn-secondary"
                               style={{ minHeight: "36px", padding: "0.3rem 0.8rem", fontSize: "0.82rem" }}
                             >
@@ -514,7 +612,7 @@ export const CampaignDetailModal: React.FC<CampaignDetailModalProps> = ({
         </div>
 
         {/* Sticky Mobile Donate Button */}
-        {campaign.status === CampaignStatus.Funding && !isExpired && (
+        {campaign.status === CampaignStatus.Funding && !isExpired && !userRole.isRegulator && (
           <div className="sticky-mobile-bar">
             <div>
               <span style={{ fontSize: "0.72rem", color: "var(--text-dim)", display: "block" }}>Terkumpul</span>

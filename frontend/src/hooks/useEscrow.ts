@@ -274,6 +274,20 @@ export function useEscrow() {
     );
   };
 
+  const fastForwardTime = async (seconds: number = 172801): Promise<boolean> => {
+    try {
+      const p = new JsonRpcProvider(FALLBACK_RPC);
+      await p.send("evm_increaseTime", [seconds]);
+      await p.send("evm_mine", []);
+      await fetchCampaigns();
+      await refreshAccountData();
+      return true;
+    } catch (e) {
+      console.error("Gagal memajukan waktu blockchain:", e);
+      return false;
+    }
+  };
+
   const closeTxModal = () => {
     setTxState({ status: "idle" });
   };
@@ -297,5 +311,6 @@ export function useEscrow() {
     withdraw,
     openDispute,
     createCampaign,
+    fastForwardTime,
   };
 }

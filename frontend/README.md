@@ -1,4 +1,4 @@
-# Frontend AmanahEscrow
+# Frontend DonationEscrow DApp
 
 Aplikasi antarmuka pengguna (dApp) untuk platform donasi berbasis milestone dan verifikator independen pada smart contract `DonationEscrow`.
 

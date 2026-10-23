@@ -3,6 +3,7 @@ import { formatEther } from "ethers";
 import { Campaign, CampaignStatus, MilestoneStatus } from "../types/escrow";
 import { useWeb3 } from "../context/Web3Context";
 import { formatRupiah, ethToIdr, idrToEth, parseRupiahInput } from "../utils/currency";
+import { calculateFileKeccak256, formatFileSize } from "../utils/hashHelper";
 
 interface DashboardEscrowProps {
   campaigns: Campaign[];
@@ -46,6 +47,7 @@ export const DashboardEscrow: React.FC<DashboardEscrowProps> = ({
 
   // State upload bukti pelaksana
   const [evidenceMap, setEvidenceMap] = useState<Record<string, string>>({});
+  const [fileInfoMap, setFileInfoMap] = useState<Record<string, { name: string; size: string }>>({});
 
   if (!account) {
     return (
@@ -223,23 +225,53 @@ export const DashboardEscrow: React.FC<DashboardEscrowProps> = ({
                       <span className="badge badge-funding">Menunggu Bukti</span>
                     </div>
 
-                    <div style={{ display: "flex", gap: "0.5rem", marginTop: "1rem" }}>
-                      <input
-                        type="text"
-                        placeholder="Masukkan hash bukti (bytes32)..."
-                        value={evidenceMap[key] || ""}
-                        onChange={(e) => setEvidenceMap({ ...evidenceMap, [key]: e.target.value })}
-                        className="form-input"
-                        style={{ flex: 1, minHeight: "40px", fontSize: "0.85rem" }}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => onSubmitEvidence(campaign.id, milestone.index, evidenceMap[key] || ("0x" + "22".repeat(32)))}
-                        className="btn-primary"
-                        style={{ minHeight: "40px" }}
-                      >
-                        Kirim Bukti
-                      </button>
+                    <div style={{ marginTop: "0.75rem", padding: "0.85rem", backgroundColor: "var(--bg-surface)", borderRadius: "var(--radius-sm)", border: "1px dashed var(--border-subtle)" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem", flexWrap: "wrap", gap: "0.5rem" }}>
+                        <span style={{ fontSize: "0.82rem", fontWeight: 600, color: "var(--text-main)" }}>
+                          📁 Unggah Berkas Foto / Dokumen PDF Bukti Fisik:
+                        </span>
+                        <input
+                          type="file"
+                          accept="image/*,.pdf"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const hash = await calculateFileKeccak256(file);
+                              setEvidenceMap((prev) => ({ ...prev, [key]: hash }));
+                              setFileInfoMap((prev) => ({
+                                ...prev,
+                                [key]: { name: file.name, size: formatFileSize(file.size) },
+                              }));
+                            }
+                          }}
+                          style={{ fontSize: "0.8rem" }}
+                        />
+                      </div>
+
+                      {fileInfoMap[key] && (
+                        <div style={{ fontSize: "0.78rem", color: "var(--color-teal)", marginBottom: "0.5rem", fontWeight: 600 }}>
+                          ✓ Berkas terbaca: {fileInfoMap[key].name} ({fileInfoMap[key].size})
+                        </div>
+                      )}
+
+                      <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                        <input
+                          type="text"
+                          placeholder="Hash bukti Keccak-256 (0x...)"
+                          value={evidenceMap[key] || ""}
+                          onChange={(e) => setEvidenceMap({ ...evidenceMap, [key]: e.target.value })}
+                          className="form-input"
+                          style={{ flex: 1, minHeight: "38px", fontSize: "0.8rem", fontFamily: "monospace" }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => onSubmitEvidence(campaign.id, milestone.index, evidenceMap[key] || ("0x" + "22".repeat(32)))}
+                          className="btn-primary"
+                          style={{ minHeight: "38px", padding: "0.35rem 0.9rem", fontSize: "0.85rem", whiteSpace: "nowrap" }}
+                        >
+                          Kirim Bukti ke Kontrak
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );

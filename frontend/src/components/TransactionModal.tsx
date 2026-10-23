@@ -4,9 +4,10 @@ import { TransactionState } from "../types/escrow";
 interface TransactionModalProps {
   txState: TransactionState;
   onClose: () => void;
+  onFastForwardTime?: (seconds?: number) => Promise<boolean>;
 }
 
-export const TransactionModal: React.FC<TransactionModalProps> = ({ txState, onClose }) => {
+export const TransactionModal: React.FC<TransactionModalProps> = ({ txState, onClose, onFastForwardTime }) => {
   if (txState.status === "idle") return null;
 
   return (
@@ -80,9 +81,34 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ txState, onC
             <h3 id="tx-modal-title" className="modal-title" style={{ color: "var(--color-rose)" }}>
               Transaksi Ditolak / Gagal
             </h3>
-            <p style={{ color: "var(--text-main)", fontSize: "0.9rem", margin: "0.75rem 0 1.5rem", backgroundColor: "var(--bg-surface)", padding: "0.85rem", borderRadius: "var(--radius-md)", border: "1px solid var(--border-subtle)", textAlign: "left" }}>
+            <p style={{ color: "var(--text-main)", fontSize: "0.9rem", margin: "0.75rem 0 1rem", backgroundColor: "var(--bg-surface)", padding: "0.85rem", borderRadius: "var(--radius-md)", border: "1px solid var(--border-subtle)", textAlign: "left" }}>
               {txState.errorMessage || "Panggilan smart contract dibatalkan oleh jaringan."}
             </p>
+
+            {onFastForwardTime && (txState.errorMessage?.toLowerCase().includes("sanggahan") || txState.errorMessage?.toLowerCase().includes("challenge")) && (
+              <div style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border-subtle)", borderRadius: "var(--radius-md)", padding: "0.85rem", marginBottom: "1rem", textAlign: "left" }}>
+                <div style={{ fontWeight: 700, fontSize: "0.85rem", color: "var(--text-main)", marginBottom: "0.25rem" }}>
+                  💡 Fitur Keamanan Smart Contract (Challenge Window):
+                </div>
+                <p style={{ fontSize: "0.8rem", color: "var(--text-muted)", marginBottom: "0.75rem", lineHeight: 1.5 }}>
+                  Setelah verifikator menyetujui bukti, smart contract memberlakukan masa tunggu 2 hari agar donatur dapat menyanggah jika ada kejanggalan sebelum dana cair ke pelaksana.
+                </p>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const ok = await onFastForwardTime();
+                    if (ok) {
+                      onClose();
+                    }
+                  }}
+                  className="btn-teal"
+                  style={{ width: "100%", fontSize: "0.82rem", fontWeight: 700, minHeight: "36px" }}
+                >
+                  ⏩ Majukan Waktu Node 2 Hari & Siap Cairkan
+                </button>
+              </div>
+            )}
+
             <button type="button" onClick={onClose} className="btn-secondary" style={{ width: "100%" }}>
               Tutup
             </button>

@@ -18,7 +18,7 @@ interface DonateModalProps {
 }
 
 export const DonateModal: React.FC<DonateModalProps> = ({ campaign, onClose, onDonate }) => {
-  const { account, balance, isCorrectNetwork, openConnectModal } = useWeb3();
+  const { account, balance, isCorrectNetwork, openConnectModal, userRole } = useWeb3();
 
   // Nominal default donasi Rp 100.000
   const [rupiahAmount, setRupiahAmount] = useState<number>(100000);
@@ -43,6 +43,11 @@ export const DonateModal: React.FC<DonateModalProps> = ({ campaign, onClose, onD
   const handleDonateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setValidationError(null);
+
+    if (userRole.isRegulator) {
+      setValidationError("Akun Regulator dilarang berdonasi demi menjaga netralitas dan independensi pengawasan sengketa.");
+      return;
+    }
 
     if (rupiahAmount < 10000) {
       setValidationError("Nominal donasi minimal adalah Rp 10.000.");
@@ -92,6 +97,16 @@ export const DonateModal: React.FC<DonateModalProps> = ({ campaign, onClose, onD
               <span>Terkumpul: <strong>{formatEthToRupiah(campaign.totalRaised)}</strong></span>
               <span>Kekurangan: <strong style={{ color: "var(--color-primary)" }}>{formatEthToRupiah(remainingEth)}</strong></span>
             </div>
+            {remainingEth > 0 && (
+              <button
+                type="button"
+                onClick={() => setRupiahAmount(Math.round(remainingEth * ETH_TO_IDR_RATE))}
+                className="btn-teal"
+                style={{ width: "100%", marginTop: "0.6rem", minHeight: "34px", fontSize: "0.82rem", fontWeight: 700 }}
+              >
+                🎯 Penuhi Sisa Target ({formatEthToRupiah(remainingEth)}) untuk Buka Tahap Milestone
+              </button>
+            )}
           </div>
 
           {/* Pilihan Nominal Cepat Rupiah */}
@@ -217,6 +232,22 @@ export const DonateModal: React.FC<DonateModalProps> = ({ campaign, onClose, onD
           ) : !isCorrectNetwork ? (
             <div style={{ textAlign: "center", color: "var(--color-rose)", fontSize: "0.9rem" }}>
               Harap alihkan jaringan dompet ke Hardhat Localhost (31337) terlebih dahulu.
+            </div>
+          ) : userRole.isRegulator ? (
+            <div
+              style={{
+                padding: "0.85rem 1rem",
+                backgroundColor: "rgba(126, 34, 206, 0.08)",
+                border: "1px solid #d8b4fe",
+                borderRadius: "var(--radius-sm)",
+                color: "#6b21a8",
+                fontSize: "0.85rem",
+                textAlign: "center",
+                lineHeight: 1.45,
+              }}
+            >
+              <strong style={{ display: "block", marginBottom: "0.2rem" }}>Aksi Dibatasi (Akun Regulator):</strong>
+              <div>Akun Regulator dilarang berdonasi demi menjaga netralitas dan independensi pengawasan sengketa.</div>
             </div>
           ) : (
             <button type="submit" className="btn-primary" style={{ width: "100%", fontSize: "1rem" }}>

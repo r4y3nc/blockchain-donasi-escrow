@@ -24,7 +24,7 @@ export const DEMO_ACCOUNTS: SimulatedAccount[] = [
   {
     name: "Donatur Publik (Masyarakat)",
     role: "Donatur",
-    address: "0x9965507D1a55bcC2695C58ba16FB37d819B0A4df", // Signer #5
+    address: "0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc", // Signer #5
     desc: "Akun masyarakat untuk mencoba berdonasi, doa donatur, refund, dan membuka sengketa.",
     badgeClass: "badge-funding",
   },
@@ -121,12 +121,34 @@ export const Web3Provider: React.FC<{ children: React.ReactNode }> = ({ children
         contract.claimable(account).catch(() => 0n),
       ]);
 
+      const isReg = regulatorAddr.toLowerCase() === account.toLowerCase();
+
+      // Cek apakah akun adalah Pelaksana (Executor) di demo accounts atau di kampanye on-chain
+      let isExec = DEMO_ACCOUNTS.some(
+        (demo) => demo.role === "Executor" && demo.address.toLowerCase() === account.toLowerCase()
+      );
+
+      if (!isExec) {
+        try {
+          const count = await contract.campaignCount();
+          for (let i = 1; i <= Math.min(Number(count), 25); i++) {
+            const camp = await contract.campaigns(i);
+            if (camp.executor && camp.executor.toLowerCase() === account.toLowerCase()) {
+              isExec = true;
+              break;
+            }
+          }
+        } catch {
+          // Abaikan kesalahan pembacaan loop kampanye
+        }
+      }
+
       setUserRole({
-        isRegulator: regulatorAddr.toLowerCase() === account.toLowerCase(),
+        isRegulator: isReg,
         isOrganizer: isOrg,
         isVerifier: isVer,
-        isExecutor: false,
-        isDonor: false,
+        isExecutor: isExec,
+        isDonor: !isReg && !isOrg && !isVer && !isExec,
         claimableBalance: claimable,
       });
     } catch (err: any) {

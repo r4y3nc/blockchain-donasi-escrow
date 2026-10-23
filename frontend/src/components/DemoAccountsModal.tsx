@@ -32,7 +32,7 @@ export const DemoAccountsModal: React.FC<DemoAccountsModalProps> = ({ onClose })
     },
     {
       role: "Donatur Publik (Masyarakat)",
-      address: "0x9965507D1a55bcC2695C58ba16FB37d819B0A4df",
+      address: "0x9965507D1a55bcC2695C58ba16FB37d819B0A4dc",
       desc: "Dapat menyumbang ke kampanye mana pun, berhak refund jika target gagal, dan berhak membuka sengketa jika donasi mencapai 5%.",
       badgeClass: "badge-funding",
     },
