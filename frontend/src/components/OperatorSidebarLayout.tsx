@@ -933,11 +933,11 @@ export const OperatorSidebarLayout: React.FC<OperatorSidebarLayoutProps> = ({
                           className="btn-primary"
                           style={{ minHeight: "32px", fontSize: "0.8rem", padding: "0.25rem 0.65rem" }}
                         >
-                          Buka Intervensi Kasus
+                          Buka Detail Kasus
                         </button>
                       </div>
                       <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", margin: "0.5rem 0" }}>
-                        Milestone ini mengalami penolakan berulang atau eskalasi sengketa. Sebagai Dewan Pengawas / Regulator, Anda memegang hak veto untuk melepaskan dana (bila pelaksana benar) atau mengembalikan dana sisa ke donatur.
+                        Milestone ini tereskalasi karena verifikator tidak merespons dalam jendela verifikasi. Dana tidak dilepas otomatis. Regulator dapat mengganti verifikator melalui skrip, belum melalui antarmuka.
                       </p>
                     </div>
                   ))}

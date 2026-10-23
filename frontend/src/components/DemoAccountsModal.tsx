@@ -9,7 +9,7 @@ export const DemoAccountsModal: React.FC<DemoAccountsModalProps> = ({ onClose })
     {
       role: "Regulator (Admin Tertinggi)",
       address: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-      desc: "Menyetujui pendaftaran yayasan/organizer, menyetujui verifikator, menyelesaikan sengketa, dan kontrol darurat pause.",
+      desc: "Memegang kewenangan atas persetujuan peran, putusan sengketa, dan penjedaan kontrak. Kewenangan ini dijalankan melalui skrip dan test, belum tersedia pada antarmuka.",
       badgeClass: "role-regulator",
     },
     {
