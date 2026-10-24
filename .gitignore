@@ -34,4 +34,4 @@ dist/
 
 .agents
 AGENTS.md
-
+coverage/
